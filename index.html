@@ -15,28 +15,29 @@
         function startAudio(freq1, amp1, freq2, amp2, noiseAmp) {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-            // Create oscillators
+            // Oscillator 1
             osc1 = audioCtx.createOscillator();
-            const gain1 = audioCtx.createGain();
+            const gainNode1 = audioCtx.createGain();
             osc1.type = 'sine';
             osc1.frequency.value = freq1;
-            gain1.gain.value = amp1;
+            gainNode1.gain.value = amp1;
 
-            osc1.connect(gain1);
-            gain1.connect(audioCtx.destination);
+            osc1.connect(gainNode1);
+            gainNode1.connect(audioCtx.destination);
             osc1.start();
 
+            // Oscillator 2
             osc2 = audioCtx.createOscillator();
-            const gain2 = audioCtx.createGain();
+            const gainNode2 = audioCtx.createGain();
             osc2.type = 'sine';
             osc2.frequency.value = freq2;
-            gain2.gain.value = amp2;
+            gainNode2.gain.value = amp2;
 
-            osc2.connect(gain2);
-            gain2.connect(audioCtx.destination);
+            osc2.connect(gainNode2);
+            gainNode2.connect(audioCtx.destination);
             osc2.start();
 
-            // Create pink noise
+            // Pink Noise
             const bufferSize = 4096;
             noise = audioCtx.createScriptProcessor(bufferSize, 1, 1);
             noiseGain = audioCtx.createGain();
@@ -63,15 +64,15 @@
             if (audioCtx) audioCtx.close();
         }
 
-        // Check URL params on page load
+        // Handle URL parameters
         window.onload = function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const freq1 = parseFloat(urlParams.get('freq1')) || 440;
-            const amp1 = parseFloat(urlParams.get('amp1')) || 0.5;
-            const freq2 = parseFloat(urlParams.get('freq2')) || 660;
-            const amp2 = parseFloat(urlParams.get('amp2')) || 0.5;
-            const noiseAmp = parseFloat(urlParams.get('noiseAmp')) || 0.2;
-            const action = urlParams.get('action');
+            const params = new URLSearchParams(window.location.search);
+            const freq1 = parseFloat(params.get('freq1')) || 440;
+            const amp1 = parseFloat(params.get('amp1')) || 0.5;
+            const freq2 = parseFloat(params.get('freq2')) || 660;
+            const amp2 = parseFloat(params.get('amp2')) || 0.5;
+            const noiseAmp = parseFloat(params.get('noiseAmp')) || 0.2;
+            const action = params.get('action');
 
             if (action === 'play') {
                 startAudio(freq1, amp1, freq2, amp2, noiseAmp);
