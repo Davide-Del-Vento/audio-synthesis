@@ -3,20 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio Player with Web Audio API</title>
-    <style>
-        /* Stile per il bottone immagine */
-        #playButton {
-            cursor: pointer; /* Cambia il cursore quando si passa sopra il bottone */
-            width: 100px; /* Dimensioni dell'immagine */
-            height: 100px;
-        }
-    </style>
+    <title>Automatic Audio Player</title>
 </head>
 <body>
-    <!-- Immagine del bottone di play -->
-    <img id="playButton" src="https://res.cloudinary.com/di0vt4sfp/image/upload/v1721315846/prrkmbidksa9czlqbaol.png" alt="Play Button" onclick="playAudio()">
-
     <script>
         let audioContext, bufferSource;
 
@@ -39,22 +28,10 @@
                 .catch(error => console.error('Error with audio loading:', error));
         };
 
-        // Funzione chiamata quando si clicca sul bottone di play (immagine)
-        function playAudio() {
-            if (!audioContext) {
-                loadAudio();
-            } else if (audioContext.state === 'suspended') {
-                audioContext.resume().then(() => {
-                    console.log('AudioContext resumed');
-                });
-            }
-        }
-
-        // Avvia il caricamento dell'audio automaticamente al caricamento della pagina
+        // Avvia il caricamento e l'avvio dell'audio automaticamente al caricamento della pagina
         window.onload = function() {
             loadAudio();
         };
     </script>
 </body>
 </html>
-
