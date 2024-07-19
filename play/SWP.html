@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automatic Audio Player</title>
+
+    <style>
+        body {
+            background-color: #1B538E; /* Cambia #f0f0f0 con il colore desiderato */
+            margin: 0; /* Rimuove il margine predefinito del body */
+            padding: 0; /* Rimuove il padding predefinito del body */
+            height: 100vh; /* Imposta l'altezza del body per occupare l'intera altezza della viewport */
+            display: flex; /* Usa flexbox per centrare il contenuto */
+            justify-content: center; /* Centra il contenuto orizzontalmente */
+            align-items: center; /* Centra il contenuto verticalmente */
+        }
+    </style>
+
+</head>
+<body>
+    <script>
+        let audioContext, bufferSource;
+
+        const setupAudio = (audioBuffer) => {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            bufferSource = audioContext.createBufferSource();
+            bufferSource.buffer = audioBuffer;
+            bufferSource.loop = true;
+            bufferSource.connect(audioContext.destination);
+            bufferSource.start(0);
+            console.log('Audio setup and started');
+        };
+
+        const loadAudio = () => {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            fetch('https://res.cloudinary.com/di0vt4sfp/video/upload/v1721381922/SWP12.wav')
+                .then(response => response.arrayBuffer())
+                .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
+                .then(setupAudio)
+                .catch(error => console.error('Error with audio loading:', error));
+        };
+
+        // Avvia il caricamento e l'avvio dell'audio automaticamente al caricamento della pagina
+        window.onload = function() {
+            loadAudio();
+        };
+    </script>
+</body>
+</html>
