@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automatic Audio Player with Volume Curve</title>
+    <style>
+        body {
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        let audioContext, bufferSource, gainNode;
+
+        // Funzione per ottenere i parametri dall'URL
+        const getUrlParams = () => {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                ampDiff: parseFloat(params.get('ampDiff')) || 6,
+                riseTime: parseFloat(params.get('riseTime')) || 3,
+                holdTimeHigh: parseFloat(params.get('holdTimeHigh')) || 1,
+                fallTime: parseFloat(params.get('fallTime')) || 4,
+                holdTimeLow: parseFloat(params.get('holdTimeLow')) || 1
+            };
+        };
+
+        const { ampDiff, riseTime, holdTimeHigh, fallTime, holdTimeLow } = getUrlParams();
+        const totalCycleTime = riseTime + holdTimeHigh + fallTime + holdTimeLow;
+
+        const setupAudio = (audioBuffer) => {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            gainNode = audioContext.createGain();
+            bufferSource = audioContext.createBufferSource();
+            bufferSource.buffer = cropAudioBuffer(audioBuffer, totalCycleTime);
+            bufferSource.loop = true;
+            bufferSource.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            console.log('Audio setup and ready to start');
+            applyVolumeCurve();
+            bufferSource.start(0);
+        };
+
+        const applyVolumeCurve = () => {
+            const maxGain = Math.pow(10, ampDiff / 20);
+            const minGain = Math.pow(10, -ampDiff / 20);
+            
+            const updateGain = () => {
+                const currentTime = audioContext.currentTime;
+                gainNode.gain.cancelScheduledValues(currentTime);
+                
+                gainNode.gain.setValueAtTime(minGain, currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(maxGain, currentTime + riseTime);
+                gainNode.gain.setValueAtTime(maxGain, currentTime + riseTime + holdTimeHigh);
+                gainNode.gain.exponentialRampToValueAtTime(minGain, currentTime + riseTime + holdTimeHigh + fallTime);
+                gainNode.gain.setValueAtTime(minGain, currentTime + totalCycleTime);
+
+                setTimeout(updateGain, totalCycleTime * 1000);
+                
+                // Invia un messaggio alla WebView di Thunkable all'inizio di ogni ciclo
+                window.parent.postMessage('sync', '*');
+            };
+
+            updateGain();
+        };
+
+        const cropAudioBuffer = (audioBuffer, duration) => {
+            const sampleRate = audioBuffer.sampleRate;
+            const length = Math.min(audioBuffer.length, sampleRate * duration);
+            const croppedBuffer = audioContext.createBuffer(audioBuffer.numberOfChannels, length, sampleRate);
+            
+            for (let i = 0; i < audioBuffer.numberOfChannels; i++) {
+                const channelData = audioBuffer.getChannelData(i);
+                croppedBuffer.copyToChannel(channelData.subarray(0, length), i);
+            }
+            
+            return croppedBuffer;
+        };
+
+        const loadAudio = () => {
+            fetch('https://res.cloudinary.com/di0vt4sfp/video/upload/v1721398311/SRN1m.wav')
+                .then(response => response.arrayBuffer())
+                .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
+                .then(setupAudio)
+                .catch(error => console.error('Error with audio loading:', error));
+        };
+
+        // Invia un messaggio di debug per verificare la connessione
+        window.onload = function() {
+            window.parent.postMessage('debug: Page loaded', '*');
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            loadAudio();
+        };
+    </script>
+</body>
+</html>
