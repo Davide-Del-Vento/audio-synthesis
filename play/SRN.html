@@ -34,7 +34,7 @@
 
         const loadAudio = () => {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            fetch('https://res.cloudinary.com/di0vt4sfp/video/upload/v1721316097/nikipsychotherapist-SRN-10sec_zbwhom.wav')
+            fetch('https://res.cloudinary.com/di0vt4sfp/video/upload/v1721381901/SRN10.wav')
                 .then(response => response.arrayBuffer())
                 .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
                 .then(setupAudio)
