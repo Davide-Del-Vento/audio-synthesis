@@ -15,17 +15,9 @@
             align-items: center;
             flex-direction: column;
         }
-
-        #playButton {
-            cursor: pointer;
-            padding: 10px 20px;
-            font-size: 16px;
-        }
     </style>
 </head>
 <body>
-    <button id="playButton">Play</button>
-
     <script>
         let audioContext, bufferSource, gainNode;
 
@@ -54,6 +46,7 @@
             gainNode.connect(audioContext.destination);
             console.log('Audio setup and ready to start');
             applyVolumeCurve();
+            bufferSource.start(0);
         };
 
         const applyVolumeCurve = () => {
@@ -97,17 +90,11 @@
                 .catch(error => console.error('Error with audio loading:', error));
         };
 
-        document.getElementById('playButton').addEventListener('click', () => {
-            if (!audioContext) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                loadAudio();
-            } else if (audioContext.state === 'suspended') {
-                audioContext.resume().then(() => {
-                    console.log('AudioContext resumed');
-                });
-            }
-            bufferSource.start(0);
-        });
+        // Avvia il caricamento dell'audio automaticamente al caricamento della pagina
+        window.onload = function() {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            loadAudio();
+        };
     </script>
 </body>
 </html>
