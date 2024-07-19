@@ -66,6 +66,7 @@
                 setTimeout(updateGain, totalCycleTime * 1000);
                 
                 // Invia un messaggio alla WebView di Thunkable all'inizio di ogni ciclo
+                console.log('Sending sync message');
                 ThunkableWebviewerExtension.postMessage('sync', '*');
                 
             };
